@@ -2,3 +2,7 @@
 *.iml
 out/
 run/
+.gradle/
+build/
+*.ipr
+*.iws

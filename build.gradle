@@ -1,0 +1,40 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+sourceCompatibility = 1.8
+
+description = 'A program to assist in determining where the most profitable shop runs are in Runescape.'
+version = 'pre1.0-b2'
+
+task compileForRelease(type: JavaCompile, dependsOn: sourcesForRelease) {
+    source = sourcesForRelease.destinationDir
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = file('build/adjustedClasses')
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.google.code.gson:gson:2.+'
+}
+
+task run(dependsOn: 'classes', type: JavaExec) {
+    main = 'the_fireplace.shoprun.ShopRunData'
+    classpath = sourceSets.main.runtimeClasspath
+    workingDir = './run'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'the_fireplace.shoprun.ShopRunData'
+        )
+    }
+}

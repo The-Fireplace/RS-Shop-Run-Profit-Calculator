@@ -25,6 +25,7 @@ public class ShopRunData extends JFrame {
 		container = this;
 		setTitle(HEADER);
 		setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+		//Center the application
 		setLocationRelativeTo(null);
 		setVisible(true);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
