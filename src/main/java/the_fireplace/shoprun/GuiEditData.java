@@ -13,20 +13,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
 class GuiEditData extends JPanel {
-	private JButton saveExitB, exitB, addB, delB, gePriceB;
-	private JLabel identifierL, itemNameL, initPriceL, gePriceL, storeStockL, sellSpeedL;
-	private JTextField identifierTF, itemNameTF, initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
+	private JButton saveExitB, exitB, addB, delB, gePriceB, addLocB, delLocB;
+	private JLabel identBoxL, itemNameL, initPriceL, gePriceL, storeStockL, sellSpeedL;
+	private JTextField itemNameTF, initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
 	private JCheckBox stackableCB;
-	private JList<String> entries, locations;
+	private JList<Integer> entries;
+	private JList<LocationData> locations;
 	private JScrollPane entriesSc, locationsSc;
 	private JComboBox<String> sortS;
+	private JComboBox identBox;
 	private static final String[] sorts = new String[]{"Profit/Store/Run (H->L)", "Profit/Store (H->L)", "Profit Margin (H->L)", "Profit/Item (H->L)", "Initial Price (L->H)", "Identifier (A->Z)", "Identifier (Z->A)"};
 
 	private EnableEditorListener checkEditorEnabled;
+
+	private ArrayList<Integer> potentialIdents;
 
 	GuiEditData() {
 		CanAddDataListener canAddToDatabase = new CanAddDataListener();
@@ -40,10 +45,15 @@ class GuiEditData extends JPanel {
 		addB.addActionListener(new AddButtonHandler());
 		delB = new JButton("Delete Selected Data");
 		delB.addActionListener(new DelButtonHandler());
-		identifierTF = new JTextField();
-		identifierTF.setEditable(false);
+		addLocB = new JButton("Add Location");
+		addLocB.addActionListener(new AddLocButtonHandler());
+		delLocB = new JButton("Delete Selected Location");
+		delLocB.addActionListener(new DelLocButtonHandler());
+		delLocB.setEnabled(false);
+		identBox = new JComboBox<>();
+		identBox.addActionListener(canAddToDatabase);
 		itemNameTF = new JTextField();
-		itemNameTF.getDocument().addDocumentListener(canAddToDatabase);
+		itemNameTF.setEditable(false);
 		DocumentFilter numbersOnly = new Lib.IntegerOnlyFilter();
 		initPriceTF = new JTextField();
 		initPriceTF.getDocument().addDocumentListener(canAddToDatabase);
@@ -69,30 +79,21 @@ class GuiEditData extends JPanel {
 		}
 		sellSpeedTF = new JTextField();
 		sellSpeedTF.getDocument().addDocumentListener(canAddToDatabase);
-		identifierL = new JLabel("<html>Data Identifier:<br /><i>Must be unique!</i></html>", SwingConstants.CENTER);
+		identBoxL = new JLabel("<html>Item ID:<br /><i>If this has multiple options,<br />check the GE Price of each<br />and choose the correct one.</i></html>", SwingConstants.CENTER);
 		itemNameL = new JLabel("Item Name:", SwingConstants.CENTER);
 		initPriceL = new JLabel("Shop Price:", SwingConstants.CENTER);
 		gePriceL = new JLabel("GE Sell Price:", SwingConstants.CENTER);
 		storeStockL = new JLabel("Amount per Store:", SwingConstants.CENTER);
 		sellSpeedL = new JLabel("GE Sell Speed:", SwingConstants.CENTER);
 		stackableCB = new JCheckBox("Is the Item Stackable?");
-		locations = new JList<>(Lib.getAllLocations());
-		locations.addListSelectionListener(canAddToDatabase);
+		locations = new JList<>();
 		locations.setLayoutOrientation(JList.VERTICAL_WRAP);
 		locations.setVisibleRowCount(0);
-		locations.setSelectionModel(new DefaultListSelectionModel() {
-			@Override
-			public void setSelectionInterval(int index0, int index1) {
-				if(super.isSelectedIndex(index0)) {
-					super.removeSelectionInterval(index0, index1);
-				}
-				else {
-					super.addSelectionInterval(index0, index1);
-				}
-			}
-		});
+		locations.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		locations.addListSelectionListener(new LocationSelectListener());
+		locations.setCellRenderer(new LocationDataRenderer());
 		locationsSc = new JScrollPane(locations);
-		locationsSc.setPreferredSize(new Dimension(ShopRunData.DEFAULT_WIDTH/5*2, ShopRunData.DEFAULT_HEIGHT/5));
+		locationsSc.setPreferredSize(new Dimension(ShopRunData.DEFAULT_WIDTH / 5 * 2, ShopRunData.DEFAULT_HEIGHT / 5));
 		sortS = new JComboBox<>(sorts);
 		sortS.addActionListener(new SortChangeListener());
 		gePriceB = new JButton("Get GE Price");
@@ -101,15 +102,16 @@ class GuiEditData extends JPanel {
 		entries = new JList<>(Database.getIdentifiers());
 		entries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		entries.addListSelectionListener(checkEditorEnabled);
+		entries.setCellRenderer(new IDListRenderer());
 		entriesSc = new JScrollPane(entries);
 
 		setLayout(new GridBagLayout());//5x5
 		//Row 0
 		add(entriesSc, 0, 0, 1, 4, 0.5, 0.25);
-		add(identifierL, 1, 0, 1, 1);
-		add(identifierTF, 2, 0, 1, 1, 0.05, 0.5);
-		add(itemNameL, 3, 0, 1, 1, 0.15, 0.5);
-		add(itemNameTF, 4, 0, 1, 1, 1.0, 0.5);
+		add(identBoxL, 1, 0, 1, 1);
+		add(identBox, 2, 0, 1, 1, 0.05, 0.5);
+		add(itemNameL, 3, 0, 1, 1, 0.15, 0.5);//TODO: Remove
+		add(itemNameTF, 4, 0, 1, 1, 1.0, 0.5);//TODO: Remove
 		//Row 1
 		add(initPriceL, 1, 1, 1, 1);
 		add(initPriceTF, 2, 1, 1, 1, 0.05, 0.5);
@@ -162,11 +164,11 @@ class GuiEditData extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			//Save and return to the previous screen
-			String[] locs = new String[locations.getSelectedValuesList().size()];
+			LocationData[] locs = new LocationData[locations.getSelectedValuesList().size()];
 			int index = 0;
-			for (String loc : locations.getSelectedValuesList())
+			for (LocationData loc : locations.getSelectedValuesList())
 				locs[index++] = loc;
-			Database.addNewItemData(identifierTF.getText(), itemNameTF.getText(), Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
+			Database.addNewItemData((int) identBox.getSelectedItem(), itemNameTF.getText(), Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
 			Database.save();
 			clear();
 			ShopRunData.actionSelectScreen();
@@ -185,8 +187,8 @@ class GuiEditData extends JPanel {
 	public class GePriceHandler implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (!itemNameTF.getText().isEmpty())
-				gePriceTF.setText(String.valueOf(Lib.getItemGEPrice(itemNameTF.getText(), gePriceTF.getText().isEmpty() ? -1 : Integer.valueOf(gePriceTF.getText()), 0)));
+			if (identBox.getSelectedItem() != null)
+				gePriceTF.setText(String.valueOf(Lib.getItemGEPrice((int) identBox.getSelectedItem(), gePriceTF.getText().isEmpty() ? -1 : Integer.valueOf(gePriceTF.getText()))));
 		}
 	}
 
@@ -205,7 +207,7 @@ class GuiEditData extends JPanel {
 	public class DelButtonHandler implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			Database.deleteData(identifierTF.getText());
+			Database.deleteData((int) identBox.getSelectedItem());
 			clear();
 			checkEditorEnabled.disableEditor();
 			entries.setListData(Database.getIdentifiers());
@@ -214,8 +216,37 @@ class GuiEditData extends JPanel {
 		}
 	}
 
+	public class AddLocButtonHandler implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			LocationData newData = Lib.createLocationDataDialog();
+			if (newData != null) {
+				LocationData[] newListData = new LocationData[locations.getModel().getSize() + 1];
+				for (int i = 0; i < newListData.length - 1; i++)
+					newListData[i] = locations.getModel().getElementAt(i);
+				newListData[newListData.length - 1] = newData;
+				locations.setListData(newListData);
+			}
+		}
+	}
+
+	public class DelLocButtonHandler implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (locations.getSelectedIndex() != -1) {
+				LocationData[] newListData = new LocationData[locations.getModel().getSize() - 1];
+				boolean skipped = false;
+				for (int i = 0; i < newListData.length + 1; i++)
+					if (i != locations.getSelectedIndex())
+						newListData[skipped ? i - 1 : i] = locations.getModel().getElementAt(i);
+					else
+						skipped = true;
+				locations.setListData(newListData);
+			}
+		}
+	}
+
 	private void clear() {
-		identifierTF.setText("");
 		itemNameTF.setText("");
 		initPriceTF.setText("");
 		gePriceTF.setText("");
@@ -223,30 +254,35 @@ class GuiEditData extends JPanel {
 		sellSpeedTF.setText("");
 		stackableCB.getModel().setSelected(false);
 		locations.clearSelection();
+		locations.setListData(new LocationData[]{});
+		identBox.setModel(new DefaultComboBoxModel<>());
+		delLocB.setEnabled(false);
 	}
 
 	private void saveCurrentData() {
-		String[] locs = new String[locations.getSelectedValuesList().size()];
-		int index = 0;
-		for (String loc : locations.getSelectedValuesList())
-			locs[index++] = loc;
-		String identifier = identifierTF.getText();
-		Database.setData(identifier, EnumDataKey.ITEM_NAME, itemNameTF.getText());
-		Database.setData(identifier, EnumDataKey.INITIAL_PRICE, Integer.parseInt(initPriceTF.getText()));
-		Database.setData(identifier, EnumDataKey.GE_PRICE, Integer.parseInt(gePriceTF.getText()));
-		Database.setData(identifier, EnumDataKey.NUMBER_PER_STORE, Integer.parseInt(storeStockTF.getText()));
-		Database.setData(identifier, EnumDataKey.STACKABLE, stackableCB.getModel().isSelected());
-		Database.setData(identifier, EnumDataKey.SELL_SPEED, sellSpeedTF.getText());
-		Database.setData(identifier, EnumDataKey.LOCATIONS, locs);
+		LocationData[] locs = new LocationData[locations.getModel().getSize()];
+		for (int i = 0; i < locs.length; i++)
+			locs[i] = locations.getModel().getElementAt(i);
+		int identifier = (int) identBox.getSelectedItem();
+		if (identifier != entries.getSelectedValue()) {
+			Database.deleteData(entries.getSelectedValue());
+			Database.addNewItemData(identifier, itemNameTF.getText(), Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
+		} else {
+			Database.setData(identifier, EnumDataKey.DEFAULT_INITIAL_PRICE, Integer.parseInt(initPriceTF.getText()));
+			Database.setData(identifier, EnumDataKey.GE_PRICE, Integer.parseInt(gePriceTF.getText()));
+			Database.setData(identifier, EnumDataKey.DEFAULT_NUMBER_PER_STORE, Integer.parseInt(storeStockTF.getText()));
+			Database.setData(identifier, EnumDataKey.STACKABLE, stackableCB.getModel().isSelected());
+			Database.setData(identifier, EnumDataKey.SELL_SPEED, sellSpeedTF.getText());
+			Database.setData(identifier, EnumDataKey.LOCATION_DATA, locs);
+		}
 		Database.save();
 	}
 
 	private void checkButton() {
-		String[] locs = new String[locations.getSelectedValuesList().size()];
-		int index = 0;
-		for (String loc : locations.getSelectedValuesList())
-			locs[index++] = loc;
-		boolean validData = Database.isValidData(identifierTF.getText(), itemNameTF.getText(), Integer.parseInt(initPriceTF.getText().isEmpty() ? "-1" : initPriceTF.getText()), Integer.parseInt(gePriceTF.getText().isEmpty() ? "-1" : gePriceTF.getText()), Integer.parseInt(storeStockTF.getText().isEmpty() ? "-1" : storeStockTF.getText()), locs);
+		LocationData[] locs = new LocationData[locations.getModel().getSize()];
+		for (int i = 0; i < locs.length; i++)
+			locs[i] = locations.getModel().getElementAt(i);
+		boolean validData = Database.isValidData(itemNameTF.getText(), Integer.parseInt(initPriceTF.getText().isEmpty() ? "-1" : initPriceTF.getText()), Integer.parseInt(gePriceTF.getText().isEmpty() ? "-1" : gePriceTF.getText()), Integer.parseInt(storeStockTF.getText().isEmpty() ? "-1" : storeStockTF.getText()), locs);
 		if (!saveExitB.isEnabled() && validData)
 			saveExitB.setEnabled(true);
 		else if (saveExitB.isEnabled() && !validData)
@@ -265,7 +301,7 @@ class GuiEditData extends JPanel {
 			gePriceB.setEnabled(false);
 	}
 
-	private class CanAddDataListener implements DocumentListener, ListSelectionListener {
+	private class CanAddDataListener implements DocumentListener, ActionListener {
 		@Override
 		public void insertUpdate(DocumentEvent e) {
 			checkButton();
@@ -282,7 +318,7 @@ class GuiEditData extends JPanel {
 		}
 
 		@Override
-		public void valueChanged(ListSelectionEvent e) {
+		public void actionPerformed(ActionEvent e) {
 			checkButton();
 		}
 	}
@@ -307,37 +343,36 @@ class GuiEditData extends JPanel {
 
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
-			String editingIdent = entries.getSelectedValue();
+			Integer editingIdent = entries.getSelectedValue();
 			if (editingIdent == null)
 				disableEditor();
 			else {
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				if (!editorEnabled)
 					enableEditor();
 				else
 					saveCurrentData();
-				identifierTF.setText(editingIdent);
-				itemNameTF.setText(Database.getItemName(editingIdent));
+				itemNameTF.setText(Database.getItemName(editingIdent));//TODO: Remove
 				initPriceTF.setText(String.valueOf(Database.getInitialPrice(editingIdent)));
 				gePriceTF.setText(String.valueOf(Database.getGEPrice(editingIdent)));
 				storeStockTF.setText(String.valueOf(Database.getAmountPerStore(editingIdent)));
 				stackableCB.getModel().setSelected(Database.getStackable(editingIdent));
 				sellSpeedTF.setText(Database.getItemSellSpeed(editingIdent));
-				String[] selectedLocations = Database.getLocations(editingIdent);
-				int[] selectedLocationIndeces = new int[selectedLocations.length];
-				int index = 0;
-				for (String loc : selectedLocations) {
-					for (int i = 0; i < Lib.getAllLocations().length; i++)
-						if (Lib.getAllLocations()[i].equals(loc)) {
-							selectedLocationIndeces[index++] = i;
-							break;
-						}
-				}
-				locations.setSelectedIndices(selectedLocationIndeces);
+				locations.setListData(Database.getLocations(editingIdent));
+
+				potentialIdents = new ArrayList<>();
+				potentialIdents.add(entries.getSelectedValue());
+				potentialIdents.addAll(Lib.getPotentialItemIdents(itemNameTF.getText()));
+				ShopRunData.LOGGER.fine("Possible IDs for "+itemNameTF.getText()+": "+potentialIdents.toString());
+				identBox.setModel(new DefaultComboBoxModel<>(potentialIdents.toArray()));
+				identBox.setEditable(potentialIdents.size() > 1);
+				checkButton();
+				setCursor(Cursor.getDefaultCursor());
 			}
 		}
 
 		void enableEditor() {
-			identifierTF.setEnabled(true);
+			identBox.setEnabled(true);
 			itemNameTF.setEnabled(true);
 			initPriceTF.setEnabled(true);
 			gePriceTF.setEnabled(true);
@@ -346,11 +381,12 @@ class GuiEditData extends JPanel {
 			stackableCB.setEnabled(true);
 			locations.setEnabled(true);
 			delB.setEnabled(true);
+			addLocB.setEnabled(true);
 			editorEnabled = true;
 		}
 
 		void disableEditor() {
-			identifierTF.setEnabled(false);
+			identBox.setEnabled(false);
 			itemNameTF.setEnabled(false);
 			initPriceTF.setEnabled(false);
 			gePriceTF.setEnabled(false);
@@ -359,15 +395,24 @@ class GuiEditData extends JPanel {
 			stackableCB.setEnabled(false);
 			locations.setEnabled(false);
 			delB.setEnabled(false);
+			addLocB.setEnabled(false);
+			delLocB.setEnabled(false);
 			editorEnabled = false;
 			clear();
 		}
 	}
 
+	public class LocationSelectListener implements ListSelectionListener {
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			delLocB.setEnabled(locations.getSelectedValue() != null);
+		}
+	}
+
 	private void sortEntries() {
 		entries.clearSelection();
-		String[] allIdents = Database.getIdentifiers();
-		LinkedList<String> idents = new LinkedList<>(Arrays.asList(allIdents));
+		Integer[] allIdents = Database.getIdentifiers();
+		LinkedList<Integer> idents = new LinkedList<>(Arrays.asList(allIdents));
 
 		idents.sort((o1, o2) -> {
 			int ret = 0;
@@ -420,7 +465,7 @@ class GuiEditData extends JPanel {
 			return ret;
 		});
 
-		String[] listValues = new String[idents.size()];
+		Integer[] listValues = new Integer[idents.size()];
 		for (int i = 0; i < idents.size(); i++)
 			listValues[i] = idents.get(i);
 		entries.setListData(listValues);

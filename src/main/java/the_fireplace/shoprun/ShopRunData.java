@@ -9,8 +9,8 @@ import java.util.logging.SimpleFormatter;
 
 public class ShopRunData extends JFrame {
 	private static final String HEADER = "Runescape Shop Run Database pre1.0-b2";
-	static final int DEFAULT_WIDTH = 960*4/3;
-	static final int DEFAULT_HEIGHT = 540*4/3;
+	static final int DEFAULT_WIDTH = 1280;
+	static final int DEFAULT_HEIGHT = 720;
 
 	private JMenuBar menuBar;
 	private JMenu fileM, editM, helpM;
@@ -34,7 +34,7 @@ public class ShopRunData extends JFrame {
 		fileM = new JMenu("File");
 		exportLog = new JCheckBoxMenuItem("Create log");
 		exportLog.getModel().addActionListener(e -> {
-			if(exportLog.getModel().isSelected()){
+			if (exportLog.getModel().isSelected()) {
 				try {
 					// This block configure the logger with handler and formatter
 					fh = new FileHandler("shoprun.log");
@@ -48,7 +48,7 @@ public class ShopRunData extends JFrame {
 				} catch (SecurityException | IOException ex) {
 					ex.printStackTrace();
 				}
-			}else{
+			} else {
 				LOGGER.info("Logging disabled");
 				LOGGER.removeHandler(fh);
 			}
@@ -74,7 +74,7 @@ public class ShopRunData extends JFrame {
 
 		actionSelectScreen();
 
-		Lib.getRSIds();
+		Lib.loadItemIDs();
 	}
 
 	public static void actionSelectScreen() {

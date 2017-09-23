@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.PrintStream;
 
 class GuiActionSelector extends JPanel {
 	private JButton viewB, editB, addB, syncB, exitB;
@@ -60,16 +59,16 @@ class GuiActionSelector extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			ShopRunData.LOGGER.finest("Syncing GE Prices");
-			if(!priceSyncing) {
+			if (!priceSyncing) {
 				new Thread(() -> {
 					priceSyncing = true;
-					String[] idents = Database.getIdentifiers();
+					Integer[] idents = Database.getIdentifiers();
 					syncProgress.setValue(0);
 					syncProgress.setMaximum(idents.length - 1);
 					syncProgress.setStringPainted(true);
 					int index = 0;
-					for (String ident : idents) {
-						Database.setData(ident, EnumDataKey.GE_PRICE, Lib.getItemGEPrice(Database.getItemName(ident), Database.getGEPrice(ident), 0));
+					for (int ident : idents) {
+						Database.setData(ident, EnumDataKey.GE_PRICE, Lib.getItemGEPrice(ident, Database.getGEPrice(ident)));
 						syncProgress.setValue(index++);
 						if (ShopRunData.container.apiWait.isSelected())
 							try {

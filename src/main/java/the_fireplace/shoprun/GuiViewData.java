@@ -8,14 +8,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
 class GuiViewData extends JPanel {
 	private JButton exitB;
 	private JLabel itemNameL, initPriceL, gePriceL, storeStockL, sellSpeedL, stackableL, profitL, profitMarginL, profitStoreL;
-	private JTextField itemNameTF, initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
-	private JList<String> entries, locations;
+	private JTextField itemNameTF, initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;//TODO: These can all be turned into Labels, using icons to distinguish between sets of locations.
+	private JList<Integer> entries;
+	private JList<LocationData> locations;
 	private JScrollPane entriesSc, locationsSc;
 	private JComboBox<String> sortS, locationF, sellSpeedF, stackableF;
 	private static final String[] sorts = new String[]{"Profit/Store/Run (H->L)", "Profit/Store (H->L)", "Profit Margin (H->L)", "Profit/Item (H->L)", "Initial Price (L->H)", "Identifier (A->Z)", "Identifier (Z->A)"};
@@ -44,8 +46,7 @@ class GuiViewData extends JPanel {
 		profitL = new JLabel("Profit/Item: ", SwingConstants.CENTER);
 		profitMarginL = new JLabel("Profit Margin: ", SwingConstants.CENTER);
 		profitStoreL = new JLabel("Profit/Store: ", SwingConstants.CENTER);
-		String[] allLocations = Lib.getAllLocations();
-		locations = new JList<>(allLocations);
+		locations = new JList<>();
 		locations.setSelectionModel(new DefaultListSelectionModel() {
 			@Override
 			public void setSelectionInterval(int index0, int index1) {
@@ -54,8 +55,9 @@ class GuiViewData extends JPanel {
 		});
 		locations.setLayoutOrientation(JList.VERTICAL_WRAP);
 		locations.setVisibleRowCount(0);
+		locations.setCellRenderer(new ViewLocationDataRenderer(this));
 		locationsSc = new JScrollPane(locations);
-		locationsSc.setPreferredSize(new Dimension(ShopRunData.DEFAULT_WIDTH/5*2, ShopRunData.DEFAULT_HEIGHT/5));
+		locationsSc.setPreferredSize(new Dimension(ShopRunData.DEFAULT_WIDTH / 5 * 2, ShopRunData.DEFAULT_HEIGHT / 5));
 		entries = new JList<>(Database.getIdentifiers());
 		entries.addListSelectionListener(new EntrySelectionListener());
 		entries.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -64,9 +66,11 @@ class GuiViewData extends JPanel {
 		SortChangeListener onValueChange = new SortChangeListener();
 		sortS = new JComboBox<>(sorts);
 		sortS.addActionListener(onValueChange);
-		locationModelList = new String[allLocations.length + 1];
+		ArrayList<String> allLocations = Lib.getAllLocations();
+		locationModelList = new String[allLocations.size() + 1];
 		locationModelList[0] = "Filter by Location";
-		System.arraycopy(allLocations, 0, locationModelList, 1, allLocations.length);
+		//noinspection SuspiciousSystemArraycopy
+		System.arraycopy(allLocations.toArray(), 0, locationModelList, 1, allLocations.size());
 		locationF = new JComboBox<>(locationModelList);
 		locationF.addActionListener(onValueChange);
 		String[] allSellSpeeds = Database.getAllSellSpeeds();
@@ -135,14 +139,14 @@ class GuiViewData extends JPanel {
 	}
 
 	private void sortEntries() {
-		String[] allIdents = Database.getIdentifiers();
-		LinkedList<String> idents = new LinkedList<>(Arrays.asList(allIdents));
+		Integer[] allIdents = Database.getIdentifiers();
+		LinkedList<Integer> idents = new LinkedList<>(Arrays.asList(allIdents));
 		//Filter first, then sort
 		idents.removeIf(identifier -> {
 			if (!locationF.getSelectedItem().equals("Filter by Location")) {
 				boolean hasLoc = false;
-				for (String loc : Database.getLocations(identifier))
-					if (loc.equals(locationF.getSelectedItem())) {
+				for (LocationData loc : Database.getLocations(identifier))
+					if (loc.locationName.equals(locationF.getSelectedItem())) {
 						hasLoc = true;
 						break;
 					}
@@ -164,7 +168,7 @@ class GuiViewData extends JPanel {
 			return false;
 		});
 
-		idents.sort((o1, o2) -> {
+		idents.sort((o1, o2) -> {//TODO: Rework all of these options to take location in to account
 			int ret = 0;
 			switch ((String) sortS.getSelectedItem()) {
 				case "Profit/Store/Run (H->L)":
@@ -215,7 +219,7 @@ class GuiViewData extends JPanel {
 			return ret;
 		});
 
-		String[] listValues = new String[idents.size()];
+		Integer[] listValues = new Integer[idents.size()];
 		for (int i = 0; i < idents.size(); i++)
 			listValues[i] = idents.get(i);
 		entries.setListData(listValues);
@@ -260,7 +264,7 @@ class GuiViewData extends JPanel {
 	private class EntrySelectionListener implements ListSelectionListener {
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
-			String editingIdent = entries.getSelectedValue();
+			Integer editingIdent = entries.getSelectedValue();
 			if (editingIdent == null)
 				clear();
 			else {
@@ -270,17 +274,7 @@ class GuiViewData extends JPanel {
 				storeStockTF.setText(String.valueOf(Database.getAmountPerStore(editingIdent)));
 				stackableL.setText("Stackable: " + (Database.getStackable(editingIdent) ? "Yes" : "No"));
 				sellSpeedTF.setText(Database.getItemSellSpeed(editingIdent));
-				String[] selectedLocations = Database.getLocations(editingIdent);
-				int[] selectedLocationIndeces = new int[selectedLocations.length];
-				int index = 0;
-				for (String loc : selectedLocations) {
-					for (int i = 0; i < Lib.getAllLocations().length; i++)
-						if (Lib.getAllLocations()[i].equals(loc)) {
-							selectedLocationIndeces[index++] = i;
-							break;
-						}
-				}
-				locations.setSelectedIndices(selectedLocationIndeces);
+				locations.setListData(Database.getLocations(editingIdent));
 				profitL.setText("Profit/Item: " + String.valueOf(Database.getProfitPerItem(editingIdent)));
 				profitMarginL.setText("Profit Margin: " + String.valueOf(Database.getProfitMarginPercent(editingIdent)) + "%");
 				int profitStore = Database.getProfitPerStore(editingIdent);

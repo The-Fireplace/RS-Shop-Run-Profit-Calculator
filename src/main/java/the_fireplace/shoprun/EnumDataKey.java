@@ -2,12 +2,12 @@ package the_fireplace.shoprun;
 
 public enum EnumDataKey {
 	ITEM_NAME,
-	INITIAL_PRICE,
+	DEFAULT_INITIAL_PRICE,
 	GE_PRICE,
-	NUMBER_PER_STORE,
+	DEFAULT_NUMBER_PER_STORE,
 	STACKABLE,
 	SELL_SPEED,
-	LOCATIONS;
+	LOCATION_DATA;
 
 	static Class getDataType(EnumDataKey key) {
 		switch (key) {
@@ -16,8 +16,8 @@ public enum EnumDataKey {
 				return String.class;
 			case STACKABLE:
 				return Boolean.class;
-			case LOCATIONS:
-				return String[].class;
+			case LOCATION_DATA:
+				return LocationData[].class;
 			default:
 				return Integer.class;
 		}
