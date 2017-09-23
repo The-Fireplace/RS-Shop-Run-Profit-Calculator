@@ -8,12 +8,6 @@ sourceCompatibility = 1.8
 description = 'A program to assist in determining where the most profitable shop runs are in Runescape.'
 version = 'pre1.0-b2'
 
-task compileForRelease(type: JavaCompile, dependsOn: sourcesForRelease) {
-    source = sourcesForRelease.destinationDir
-    classpath = sourceSets.main.compileClasspath
-    destinationDir = file('build/adjustedClasses')
-}
-
 repositories {
     mavenCentral()
 }
