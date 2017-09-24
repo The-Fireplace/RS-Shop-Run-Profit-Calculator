@@ -19,19 +19,20 @@ import java.util.LinkedList;
 
 class GuiEditData extends JPanel {
 	private JButton saveExitB, exitB, addB, delB, gePriceB, addLocB, delLocB;
-	private JLabel identBoxL, itemNameL, initPriceL, gePriceL, storeStockL, sellSpeedL;
-	private JTextField itemNameTF, initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
+	private JLabel identBoxL, initPriceL, gePriceL, storeStockL, sellSpeedL;
+	private JTextField initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
 	private JCheckBox stackableCB;
 	private JList<Integer> entries;
 	private JList<LocationData> locations;
 	private JScrollPane entriesSc, locationsSc;
 	private JComboBox<String> sortS;
 	private JComboBox identBox;
-	private static final String[] sorts = new String[]{"Profit/Store/Run (H->L)", "Profit/Store (H->L)", "Profit Margin (H->L)", "Profit/Item (H->L)", "Initial Price (L->H)", "Identifier (A->Z)", "Identifier (Z->A)"};
+	private static final String[] sorts = new String[]{"Default Profit/Store/Run (H->L)", "Default Profit/Store (H->L)", "Default Profit Margin (H->L)", "Default Profit/Item (H->L)", "Default Initial Price (L->H)"};
 
 	private EnableEditorListener checkEditorEnabled;
 
 	private ArrayList<Integer> potentialIdents;
+	private String itemName = "";
 
 	GuiEditData() {
 		CanAddDataListener canAddToDatabase = new CanAddDataListener();
@@ -52,8 +53,6 @@ class GuiEditData extends JPanel {
 		delLocB.setEnabled(false);
 		identBox = new JComboBox<>();
 		identBox.addActionListener(canAddToDatabase);
-		itemNameTF = new JTextField();
-		itemNameTF.setEditable(false);
 		DocumentFilter numbersOnly = new Lib.IntegerOnlyFilter();
 		initPriceTF = new JTextField();
 		initPriceTF.getDocument().addDocumentListener(canAddToDatabase);
@@ -80,10 +79,9 @@ class GuiEditData extends JPanel {
 		sellSpeedTF = new JTextField();
 		sellSpeedTF.getDocument().addDocumentListener(canAddToDatabase);
 		identBoxL = new JLabel("<html>Item ID:<br /><i>If this has multiple options,<br />check the GE Price of each<br />and choose the correct one.</i></html>", SwingConstants.CENTER);
-		itemNameL = new JLabel("Item Name:", SwingConstants.CENTER);
-		initPriceL = new JLabel("Shop Price:", SwingConstants.CENTER);
+		initPriceL = new JLabel("Default Shop Price:", SwingConstants.CENTER);
 		gePriceL = new JLabel("GE Sell Price:", SwingConstants.CENTER);
-		storeStockL = new JLabel("Amount per Store:", SwingConstants.CENTER);
+		storeStockL = new JLabel("Default Amount per Store:", SwingConstants.CENTER);
 		sellSpeedL = new JLabel("GE Sell Speed:", SwingConstants.CENTER);
 		stackableCB = new JCheckBox("Is the Item Stackable?");
 		locations = new JList<>();
@@ -110,22 +108,22 @@ class GuiEditData extends JPanel {
 		add(entriesSc, 0, 0, 1, 4, 0.5, 0.25);
 		add(identBoxL, 1, 0, 1, 1);
 		add(identBox, 2, 0, 1, 1, 0.05, 0.5);
-		add(itemNameL, 3, 0, 1, 1, 0.15, 0.5);//TODO: Remove
-		add(itemNameTF, 4, 0, 1, 1, 1.0, 0.5);//TODO: Remove
+		add(gePriceL, 3, 0, 1, 1, 0.15, 0.5);
+		add(gePriceTF, 4, 0, 1, 1, 1.0, 0.5);
 		//Row 1
 		add(initPriceL, 1, 1, 1, 1);
 		add(initPriceTF, 2, 1, 1, 1, 0.05, 0.5);
-		add(gePriceL, 3, 1, 1, 1, 0.15, 0.5);
-		add(gePriceTF, 4, 1, 1, 1, 1.0, 0.5);
+		add(sellSpeedL, 3, 1, 1, 1, 0.15, 0.5);
+		add(sellSpeedTF, 4, 1, 1, 1, 1.0, 0.5);
 		//Row 2
 		add(storeStockL, 1, 2, 1, 1);
 		add(storeStockTF, 2, 2, 1, 1, 0.05, 0.5);
-		add(sellSpeedL, 3, 2, 1, 1, 0.15, 0.5);
-		add(sellSpeedTF, 4, 2, 1, 1, 0.75, 0.5);
+		add(locationsSc, 3, 2, 2, 1, 0.15, 0.5);
 		//Row 3
 		add(gePriceB, 1, 3, 1, 1);
 		add(stackableCB, 2, 3, 1, 1, 0.05, 0.01);
-		add(locationsSc, 3, 3, 2, 1, 0.3, 0.01);
+		add(addLocB, 3, 3, 1, 1, 0.3, 0.01);
+		add(delLocB, 4, 3, 1, 1, 0.3, 0.01);
 		//Row 4
 		add(addB, 0, 4, 1, 1);
 		add(sortS, 1, 4, 1, 1);
@@ -168,7 +166,7 @@ class GuiEditData extends JPanel {
 			int index = 0;
 			for (LocationData loc : locations.getSelectedValuesList())
 				locs[index++] = loc;
-			Database.addNewItemData((int) identBox.getSelectedItem(), itemNameTF.getText(), Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
+			Database.addNewItemData((int) identBox.getSelectedItem(), itemName, Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
 			Database.save();
 			clear();
 			ShopRunData.actionSelectScreen();
@@ -247,7 +245,6 @@ class GuiEditData extends JPanel {
 	}
 
 	private void clear() {
-		itemNameTF.setText("");
 		initPriceTF.setText("");
 		gePriceTF.setText("");
 		storeStockTF.setText("");
@@ -266,7 +263,7 @@ class GuiEditData extends JPanel {
 		int identifier = (int) identBox.getSelectedItem();
 		if (identifier != entries.getSelectedValue()) {
 			Database.deleteData(entries.getSelectedValue());
-			Database.addNewItemData(identifier, itemNameTF.getText(), Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
+			Database.addNewItemData(identifier, itemName, Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
 		} else {
 			Database.setData(identifier, EnumDataKey.DEFAULT_INITIAL_PRICE, Integer.parseInt(initPriceTF.getText()));
 			Database.setData(identifier, EnumDataKey.GE_PRICE, Integer.parseInt(gePriceTF.getText()));
@@ -282,7 +279,7 @@ class GuiEditData extends JPanel {
 		LocationData[] locs = new LocationData[locations.getModel().getSize()];
 		for (int i = 0; i < locs.length; i++)
 			locs[i] = locations.getModel().getElementAt(i);
-		boolean validData = Database.isValidData(itemNameTF.getText(), Integer.parseInt(initPriceTF.getText().isEmpty() ? "-1" : initPriceTF.getText()), Integer.parseInt(gePriceTF.getText().isEmpty() ? "-1" : gePriceTF.getText()), Integer.parseInt(storeStockTF.getText().isEmpty() ? "-1" : storeStockTF.getText()), locs);
+		boolean validData = Database.isValidData(itemName, Integer.parseInt(initPriceTF.getText().isEmpty() ? "-1" : initPriceTF.getText()), Integer.parseInt(gePriceTF.getText().isEmpty() ? "-1" : gePriceTF.getText()), Integer.parseInt(storeStockTF.getText().isEmpty() ? "-1" : storeStockTF.getText()), locs);
 		if (!saveExitB.isEnabled() && validData)
 			saveExitB.setEnabled(true);
 		else if (saveExitB.isEnabled() && !validData)
@@ -295,10 +292,6 @@ class GuiEditData extends JPanel {
 			addB.setEnabled(true);
 		else if (addB.isEnabled() && !validData)
 			addB.setEnabled(false);
-		if (!gePriceB.isEnabled() && !itemNameTF.getText().isEmpty())
-			gePriceB.setEnabled(true);
-		else if (gePriceB.isEnabled() && itemNameTF.getText().isEmpty())
-			gePriceB.setEnabled(false);
 	}
 
 	private class CanAddDataListener implements DocumentListener, ActionListener {
@@ -352,7 +345,7 @@ class GuiEditData extends JPanel {
 					enableEditor();
 				else
 					saveCurrentData();
-				itemNameTF.setText(Database.getItemName(editingIdent));//TODO: Remove
+				itemName = Database.getItemName(editingIdent);
 				initPriceTF.setText(String.valueOf(Database.getInitialPrice(editingIdent)));
 				gePriceTF.setText(String.valueOf(Database.getGEPrice(editingIdent)));
 				storeStockTF.setText(String.valueOf(Database.getAmountPerStore(editingIdent)));
@@ -362,8 +355,8 @@ class GuiEditData extends JPanel {
 
 				potentialIdents = new ArrayList<>();
 				potentialIdents.add(entries.getSelectedValue());
-				potentialIdents.addAll(Lib.getPotentialItemIdents(itemNameTF.getText()));
-				ShopRunData.LOGGER.fine("Possible IDs for "+itemNameTF.getText()+": "+potentialIdents.toString());
+				potentialIdents.addAll(Lib.getPotentialItemIdents(itemName));
+				ShopRunData.LOGGER.fine("Possible IDs for "+itemName+": "+potentialIdents.toString());
 				identBox.setModel(new DefaultComboBoxModel<>(potentialIdents.toArray()));
 				identBox.setEditable(potentialIdents.size() > 1);
 				checkButton();
@@ -373,7 +366,6 @@ class GuiEditData extends JPanel {
 
 		void enableEditor() {
 			identBox.setEnabled(true);
-			itemNameTF.setEnabled(true);
 			initPriceTF.setEnabled(true);
 			gePriceTF.setEnabled(true);
 			storeStockTF.setEnabled(true);
@@ -387,7 +379,7 @@ class GuiEditData extends JPanel {
 
 		void disableEditor() {
 			identBox.setEnabled(false);
-			itemNameTF.setEnabled(false);
+			itemName = "";
 			initPriceTF.setEnabled(false);
 			gePriceTF.setEnabled(false);
 			storeStockTF.setEnabled(false);
@@ -417,7 +409,7 @@ class GuiEditData extends JPanel {
 		idents.sort((o1, o2) -> {
 			int ret = 0;
 			switch ((String) sortS.getSelectedItem()) {
-				case "Profit/Store/Run (H->L)":
+				case "Default Profit/Store/Run (H->L)":
 					int psr1 = Database.getProfitPerStorePerRun(o1);
 					int psr2 = Database.getProfitPerStorePerRun(o2);
 					if (psr1 < psr2)
@@ -425,7 +417,7 @@ class GuiEditData extends JPanel {
 					else if (psr1 > psr2)
 						ret = -1;
 					return ret;
-				case "Profit/Store (H->L)":
+				case "Default Profit/Store (H->L)":
 					int ps1 = Database.getProfitPerStore(o1);
 					int ps2 = Database.getProfitPerStore(o2);
 					if (ps1 < ps2)
@@ -433,7 +425,7 @@ class GuiEditData extends JPanel {
 					else if (ps1 > ps2)
 						ret = -1;
 					return ret;
-				case "Profit Margin (H->L)":
+				case "Default Profit Margin (H->L)":
 					float pm1 = Database.getProfitMarginPercent(o1);
 					float pm2 = Database.getProfitMarginPercent(o2);
 					if (pm1 < pm2)
@@ -441,7 +433,7 @@ class GuiEditData extends JPanel {
 					else if (pm1 > pm2)
 						ret = -1;
 					return ret;
-				case "Profit/Item (H->L)":
+				case "Default Profit/Item (H->L)":
 					float pi1 = Database.getProfitPerItem(o1);
 					float pi2 = Database.getProfitPerItem(o2);
 					if (pi1 < pi2)
@@ -449,7 +441,7 @@ class GuiEditData extends JPanel {
 					else if (pi1 > pi2)
 						ret = -1;
 					return ret;
-				case "Initial Price (L->H)":
+				case "Default Initial Price (L->H)":
 					float ip1 = Database.getInitialPrice(o1);
 					float ip2 = Database.getInitialPrice(o2);
 					if (ip1 > ip2)
@@ -457,10 +449,6 @@ class GuiEditData extends JPanel {
 					else if (ip1 < ip2)
 						ret = -1;
 					return ret;
-				case "Identifier (A->Z)":
-					return o1.compareTo(o2);
-				case "Identifier (Z->A)":
-					return o2.compareTo(o1);
 			}
 			return ret;
 		});

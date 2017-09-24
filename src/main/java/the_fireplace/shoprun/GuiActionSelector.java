@@ -72,7 +72,7 @@ class GuiActionSelector extends JPanel {
 						syncProgress.setValue(index++);
 						if (ShopRunData.container.apiWait.isSelected())
 							try {
-								Thread.sleep(5001);//This is necessary to keep the Runescape Website from locking the user out.
+								Thread.sleep(5001);//This is necessary to keep the Runescape Website from feeding the user garbage
 							} catch (InterruptedException e1) {
 								ShopRunData.LOGGER.severe(e1.getLocalizedMessage());
 							}
