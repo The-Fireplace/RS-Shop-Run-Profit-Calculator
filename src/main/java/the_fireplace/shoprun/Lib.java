@@ -9,6 +9,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.DocumentFilter;
+import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -151,6 +152,7 @@ public abstract class Lib {
 		JTextField storeStock = new JTextField("Default");
 
 		JPanel dataPanel = new JPanel();
+		dataPanel.setLayout(new GridLayout(0, 2));
 		dataPanel.add(new JLabel("Location:"));
 		dataPanel.add(locations);
 		dataPanel.add(new JLabel("<html><i>Enter just the number, or it will be unknown.</i><br />Avg. Bank Round Trip(in seconds):</html>"));

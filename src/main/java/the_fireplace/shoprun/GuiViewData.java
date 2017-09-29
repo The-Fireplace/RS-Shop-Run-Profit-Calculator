@@ -35,6 +35,11 @@ class GuiViewData extends JPanel {
 		profitTF = new JLabel();
 		profitMarginTF = new JLabel();
 		profitStoreTF = new JLabel();
+		initPriceTF.setLayout(new BoxLayout(initPriceTF, BoxLayout.Y_AXIS));
+		storeStockTF.setLayout(new BoxLayout(storeStockTF, BoxLayout.Y_AXIS));
+		profitMarginTF.setLayout(new BoxLayout(profitMarginTF, BoxLayout.Y_AXIS));
+		profitTF.setLayout(new BoxLayout(profitTF, BoxLayout.Y_AXIS));
+		profitStoreTF.setLayout(new BoxLayout(profitStoreTF, BoxLayout.Y_AXIS));
 		initPriceL = new JLabel("Shop Price:", SwingConstants.CENTER);
 		gePriceL = new JLabel("GE Sell Price:", SwingConstants.CENTER);
 		storeStockL = new JLabel("Amount per Store:", SwingConstants.CENTER);
@@ -280,11 +285,13 @@ class GuiViewData extends JPanel {
 				HashMap<Pair<Integer, Integer>, ArrayList<LocationData>> pairMap = GuiViewData.locationGroups.get(entries.getSelectedValue());
 				Object[] pairs = pairMap.keySet().toArray();
 				//Values that can change by location
-				initPriceTF.setLayout(new BoxLayout(initPriceTF, BoxLayout.Y_AXIS));
-				storeStockTF.setLayout(new BoxLayout(storeStockTF, BoxLayout.Y_AXIS));
-				profitMarginTF.setLayout(new BoxLayout(profitMarginTF, BoxLayout.Y_AXIS));
-				profitTF.setLayout(new BoxLayout(profitTF, BoxLayout.Y_AXIS));
-				profitStoreTF.setLayout(new BoxLayout(profitStoreTF, BoxLayout.Y_AXIS));
+				//Clear the data
+				initPriceTF.removeAll();
+				storeStockTF.removeAll();
+				profitMarginTF.removeAll();
+				profitTF.removeAll();
+				profitStoreTF.removeAll();
+				//Add the data
 				int defaultProfitStore = Database.getProfitPerStore(viewingIdent);
 				int defaultProfitStoreRun = Database.getProfitPerStorePerRun(viewingIdent);
 				for(Pair<Integer, Integer> pair:locationGroups.get(viewingIdent).keySet()) {
