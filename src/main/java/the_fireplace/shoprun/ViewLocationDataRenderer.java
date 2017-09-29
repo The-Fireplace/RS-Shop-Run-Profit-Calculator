@@ -26,6 +26,10 @@ public class ViewLocationDataRenderer extends DefaultListCellRenderer {
 			if(pairMap.get(pairs[i]).contains(data))
 				setIcon(new ImageIcon(getClass().getResource("/images/loc" + String.valueOf(i+1) + ".png")));
 		}
+		if(isSelected)
+			setBorder(BorderFactory.createLineBorder(new Color(200, 150, 0)));
+		else
+			setBorder(null);
 		return this;
 	}
 }

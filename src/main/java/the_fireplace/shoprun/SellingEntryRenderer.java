@@ -36,7 +36,10 @@ public class SellingEntryRenderer extends DefaultListCellRenderer {
 			setIcon(imageIcon);
 		}
 		setText(Database.getItemName((int) value));
-		//TODO: Highlight selected entry
+		if(isSelected)
+			setBorder(BorderFactory.createLineBorder(new Color(200, 150, 0)));
+		else
+			setBorder(null);
 		return this;
 	}
 }
