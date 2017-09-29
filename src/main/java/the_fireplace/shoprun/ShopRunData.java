@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -36,13 +37,13 @@ public class ShopRunData extends JFrame {
 		exportLog.getModel().addActionListener(e -> {
 			if (exportLog.getModel().isSelected()) {
 				try {
-					// This block configure the logger with handler and formatter
+					// This block configures the logger with handler and formatter
 					fh = new FileHandler("shoprun.log");
 					LOGGER.addHandler(fh);
+					LOGGER.setLevel(Level.ALL);
 					SimpleFormatter formatter = new SimpleFormatter();
 					fh.setFormatter(formatter);
 
-					// the following statement is used to log any messages
 					LOGGER.info("Logger enabled");
 
 				} catch (SecurityException | IOException ex) {
@@ -51,6 +52,7 @@ public class ShopRunData extends JFrame {
 			} else {
 				LOGGER.info("Logging disabled");
 				LOGGER.removeHandler(fh);
+				fh.close();
 			}
 		});
 		fileM.add(exportLog);
