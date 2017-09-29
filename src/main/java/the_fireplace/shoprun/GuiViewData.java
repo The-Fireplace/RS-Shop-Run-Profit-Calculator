@@ -174,40 +174,40 @@ class GuiViewData extends JPanel {
 			int ret = 0;
 			switch ((String) sortS.getSelectedItem()) {
 				case "Default Profit/Store/Run (H->L)":
-					int psr1 = Database.getProfitPerStorePerRun(o1);
-					int psr2 = Database.getProfitPerStorePerRun(o2);
+					int psr1 = Database.getDefaultProfitPerStorePerRun(o1);
+					int psr2 = Database.getDefaultProfitPerStorePerRun(o2);
 					if (psr1 < psr2)
 						ret = 1;
 					else if (psr1 > psr2)
 						ret = -1;
 					return ret;
 				case "Default Profit/Store (H->L)":
-					int ps1 = Database.getProfitPerStore(o1);
-					int ps2 = Database.getProfitPerStore(o2);
+					int ps1 = Database.getDefaultProfitPerStore(o1);
+					int ps2 = Database.getDefaultProfitPerStore(o2);
 					if (ps1 < ps2)
 						ret = 1;
 					else if (ps1 > ps2)
 						ret = -1;
 					return ret;
 				case "Default Profit Margin (H->L)":
-					float pm1 = Database.getProfitMarginPercent(o1);
-					float pm2 = Database.getProfitMarginPercent(o2);
+					float pm1 = Database.getDefaultProfitMarginPercent(o1);
+					float pm2 = Database.getDefaultProfitMarginPercent(o2);
 					if (pm1 < pm2)
 						ret = 1;
 					else if (pm1 > pm2)
 						ret = -1;
 					return ret;
 				case "Default Profit/Item (H->L)":
-					float pi1 = Database.getProfitPerItem(o1);
-					float pi2 = Database.getProfitPerItem(o2);
+					float pi1 = Database.getDefaultProfitPerItem(o1);
+					float pi2 = Database.getDefaultProfitPerItem(o2);
 					if (pi1 < pi2)
 						ret = 1;
 					else if (pi1 > pi2)
 						ret = -1;
 					return ret;
 				case "Default Initial Price (L->H)":
-					float ip1 = Database.getInitialPrice(o1);
-					float ip2 = Database.getInitialPrice(o2);
+					float ip1 = Database.getDefaultInitialPrice(o1);
+					float ip2 = Database.getDefaultInitialPrice(o2);
 					if (ip1 > ip2)
 						ret = 1;
 					else if (ip1 < ip2)
@@ -255,6 +255,7 @@ class GuiViewData extends JPanel {
 
 		@Override
 		public void componentHidden(ComponentEvent e) {
+			entries.clearSelection();
 			clear();
 		}
 	}
@@ -270,13 +271,8 @@ class GuiViewData extends JPanel {
 				locations.setListData(locs);
 				//Group the location data by price and store stock. This rebuilds every time the item is viewed because locations could have been changed.
 				locationGroups.put(viewingIdent, new HashMap<>());
-				for (LocationData loc : locs) {
-					Pair<Integer, Integer> locPriceDat = new Pair<>(loc.itemPrice, loc.itemCount);
-					if (!locationGroups.get(viewingIdent).containsKey(locPriceDat))
-						locationGroups.get(viewingIdent).put(locPriceDat, new ArrayList<>(Collections.singleton(loc)));
-					else
-						locationGroups.get(viewingIdent).get(locPriceDat).add(loc);
-				}
+				for (Pair<Integer, Integer> locPriceDat : Database.getInitialPricesAndStoreStocks(viewingIdent))
+					locationGroups.get(viewingIdent).put(locPriceDat, Database.locationsWithPair(viewingIdent, locs, locPriceDat));
 				//Values that don't change by location
 				gePriceTF.setText(String.valueOf(Database.getGEPrice(viewingIdent)));
 				stackableL.setText("Stackable: " + (Database.getStackable(viewingIdent) ? "Yes" : "No"));
@@ -285,40 +281,45 @@ class GuiViewData extends JPanel {
 				HashMap<Pair<Integer, Integer>, ArrayList<LocationData>> pairMap = GuiViewData.locationGroups.get(entries.getSelectedValue());
 				Object[] pairs = pairMap.keySet().toArray();
 				//Values that can change by location
-				//Clear the data
+				//Clear the old data
 				initPriceTF.removeAll();
+				initPriceTF.updateUI();
 				storeStockTF.removeAll();
+				storeStockTF.updateUI();
 				profitMarginTF.removeAll();
+				profitMarginTF.updateUI();
 				profitTF.removeAll();
+				profitTF.updateUI();
 				profitStoreTF.removeAll();
+				profitStoreTF.updateUI();
 				//Add the data
-				int defaultProfitStore = Database.getProfitPerStore(viewingIdent);
-				int defaultProfitStoreRun = Database.getProfitPerStorePerRun(viewingIdent);
+				int defaultProfitStore = Database.getDefaultProfitPerStore(viewingIdent);
+				int defaultProfitStoreRun = Database.getDefaultProfitPerStorePerRun(viewingIdent);
 				for(Pair<Integer, Integer> pair:locationGroups.get(viewingIdent).keySet()) {
-					JLabel initPrice = new JLabel(pair.getKey() == -1 ? String.valueOf(Database.getInitialPrice(viewingIdent)) : String.valueOf(pair.getKey()), SwingConstants.CENTER);
+					JLabel initPrice = new JLabel(String.valueOf(Database.getInitialPrice(viewingIdent, pair)), SwingConstants.CENTER);
 					for(int i=0;i<pairs.length;i++)
 						if(pairs[i].equals(pair))
 							initPrice.setIcon(new ImageIcon(getClass().getResource("/images/loc" + String.valueOf(i+1) + ".png")));
 					initPriceTF.add(initPrice);
-					int amountPerStore = pair.getValue() == -1 ? Database.getAmountPerStore(viewingIdent) : pair.getValue();
+					int amountPerStore = Database.getAmountPerStore(viewingIdent, pair);
 					JLabel storeStock = new JLabel(String.valueOf(amountPerStore), SwingConstants.CENTER);
 					for(int i=0;i<pairs.length;i++)
 						if(pairs[i].equals(pair))
 							storeStock.setIcon(new ImageIcon(getClass().getResource("/images/loc" + String.valueOf(i+1) + ".png")));
 					storeStockTF.add(storeStock);
-					JLabel profitMargin = new JLabel(pair.getKey() == -1 ? String.valueOf(Database.getProfitMarginPercent(viewingIdent)) + "%" : String.format("%.2f", (1 - ((float) pair.getKey()) / ((float) Database.getGEPrice(viewingIdent))) * 100) + "%", SwingConstants.CENTER);
+					JLabel profitMargin = new JLabel(String.valueOf(Database.getProfitMarginPercent(viewingIdent, pair)) + "%", SwingConstants.CENTER);
 					for(int i=0;i<pairs.length;i++)
 						if(pairs[i].equals(pair))
 							profitMargin.setIcon(new ImageIcon(getClass().getResource("/images/loc" + String.valueOf(i+1) + ".png")));
 					profitMarginTF.add(profitMargin);
-					JLabel profitItem = new JLabel(pair.getKey() == -1 ? String.valueOf(Database.getProfitPerItem(viewingIdent)) : String.valueOf(Database.getGEPrice(viewingIdent) - pair.getKey()), SwingConstants.CENTER);
+					JLabel profitItem = new JLabel(String.valueOf(Database.getProfitPerItem(viewingIdent, pair)), SwingConstants.CENTER);
 					for(int i=0;i<pairs.length;i++)
 						if(pairs[i].equals(pair))
 							profitItem.setIcon(new ImageIcon(getClass().getResource("/images/loc" + String.valueOf(i+1) + ".png")));
 					profitTF.add(profitItem);
 					JLabel profitStoreLabel;
-					int profitStore = (pair.getKey() == -1 ? Database.getProfitPerItem(viewingIdent) : Database.getGEPrice(viewingIdent) - pair.getKey())*(pair.getValue() == -1 ? Database.getAmountPerStore(viewingIdent) : pair.getValue());
-					int profitStoreRun = (pair.getKey() == -1 ? Database.getProfitPerItem(viewingIdent) : Database.getGEPrice(viewingIdent) - pair.getKey())*(amountPerStore > 28 ? 28 : amountPerStore);
+					int profitStore = Database.getProfitPerStore(viewingIdent, pair);
+					int profitStoreRun = Database.getProfitPerStorePerRun(viewingIdent, pair);
 					if (profitStore != profitStoreRun)
 						profitStoreLabel = new JLabel("<html>" + String.valueOf(profitStoreRun) + "<br />" + String.valueOf(profitStore) + "</html>");
 					else

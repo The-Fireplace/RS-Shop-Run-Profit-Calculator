@@ -7,8 +7,10 @@ public class SellingEntryRenderer extends DefaultListCellRenderer {
 
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-		int profitPerStoreRun = Database.getProfitPerStorePerRun((int) value);
-		String iconCode = "";
+		if(value == null)
+			return this;
+		int profitPerStoreRun = Database.getDefaultProfitPerStorePerRun((int) value);
+		String iconCode;
 		if (profitPerStoreRun <= 0)
 			iconCode = "x";
 		else if (profitPerStoreRun < 1000)
@@ -34,6 +36,7 @@ public class SellingEntryRenderer extends DefaultListCellRenderer {
 			setIcon(imageIcon);
 		}
 		setText(Database.getItemName((int) value));
+		//TODO: Highlight selected entry
 		return this;
 	}
 }

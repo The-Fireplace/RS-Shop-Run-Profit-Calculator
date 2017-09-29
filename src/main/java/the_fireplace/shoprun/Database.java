@@ -1,9 +1,9 @@
 package the_fireplace.shoprun;
 
+import javafx.util.Pair;
+
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 final class Database implements Serializable {
 	private static final long serialVersionUID = 0x1A21E510;
@@ -67,7 +67,7 @@ final class Database implements Serializable {
 		return identifiers;
 	}
 
-	static int getInitialPrice(int identifier) {
+	static int getDefaultInitialPrice(int identifier) {
 		return (int) instance.itemDatabase.get(identifier).get(EnumDataKey.DEFAULT_INITIAL_PRICE.name());
 	}
 
@@ -75,7 +75,7 @@ final class Database implements Serializable {
 		return (int) instance.itemDatabase.get(identifier).get(EnumDataKey.GE_PRICE.name());
 	}
 
-	static int getAmountPerStore(int identifier) {
+	static int getDefaultAmountPerStore(int identifier) {
 		return (int) instance.itemDatabase.get(identifier).get(EnumDataKey.DEFAULT_NUMBER_PER_STORE.name());
 	}
 
@@ -108,27 +108,82 @@ final class Database implements Serializable {
 		return out;
 	}
 
-	static int getProfitPerItem(int identifier) {
-		return getGEPrice(identifier) - getInitialPrice(identifier);
+	static int getDefaultProfitPerItem(int identifier) {
+		return getGEPrice(identifier) - getDefaultInitialPrice(identifier);
 	}
 
-	static int getProfitPerStore(int identifier) {
-		return getProfitPerItem(identifier) * getAmountPerStore(identifier);
+	static int getDefaultProfitPerStore(int identifier) {
+		return getDefaultProfitPerItem(identifier) * getDefaultAmountPerStore(identifier);
 	}
 
-	static int getProfitPerStorePerRun(int identifier) {
-		if (!getStackable(identifier) && getAmountPerStore(identifier) > 28)
-			return getProfitPerItem(identifier) * 28;
+	static int getDefaultProfitPerStorePerRun(int identifier) {
+		if (!getStackable(identifier) && getDefaultAmountPerStore(identifier) > 28)
+			return getDefaultProfitPerItem(identifier) * 28;
 		else
-			return getProfitPerStore(identifier);
+			return getDefaultProfitPerStore(identifier);
 	}
 
-	static float getProfitMarginPercent(int identifier) {
-		return Float.valueOf(String.format("%.2f", (1 - ((float) getInitialPrice(identifier)) / ((float) getGEPrice(identifier))) * 100));
+	static float getDefaultProfitMarginPercent(int identifier) {
+		return Float.valueOf(String.format("%.2f", (1 - ((float) getDefaultInitialPrice(identifier)) / ((float) getGEPrice(identifier))) * 100));
 	}
 
 	static void deleteData(int identifier) {
 		instance.itemDatabase.remove(identifier);
+	}
+
+	//Location-based data getters
+	static LinkedList<Pair<Integer, Integer>> getInitialPricesAndStoreStocks(int identifier){
+		LocationData[] locationData = getLocations(identifier);
+		LinkedList<Pair<Integer, Integer>> outList = new LinkedList<>();
+		for (LocationData loc : locationData) {
+			Pair<Integer, Integer> locPriceDat = new Pair<>(loc.itemPrice, loc.itemCount);
+			if (!outList.contains(locPriceDat))
+				outList.add(locPriceDat);
+		}
+		return outList;
+	}
+
+	static int getInitialPrice(int identifier, LocationData loc){
+		return loc.itemPrice == -1 ? getDefaultInitialPrice(identifier) : loc.itemPrice;
+	}
+
+	static int getAmountPerStore(int identifier, LocationData loc){
+		return loc.itemCount == -1 ? getDefaultAmountPerStore(identifier) : loc.itemCount;
+	}
+
+	static int getInitialPrice(int identifier, Pair<Integer, Integer> data){
+		return data.getKey() == -1 ? getDefaultInitialPrice(identifier) : data.getKey();
+	}
+
+	static int getAmountPerStore(int identifier, Pair<Integer, Integer> data){
+		return data.getValue() == -1 ? getDefaultAmountPerStore(identifier) : data.getValue();
+	}
+
+	static float getProfitMarginPercent(int identifier, Pair<Integer, Integer> data){
+		return Float.valueOf(String.format("%.2f", (1 - ((float) getInitialPrice(identifier, data)) / ((float) getGEPrice(identifier))) * 100));
+	}
+
+	static int getProfitPerItem(int identifier, Pair<Integer, Integer> data){
+		return getGEPrice(identifier) - getInitialPrice(identifier, data);
+	}
+
+	static int getProfitPerStore(int identifier, Pair<Integer, Integer> data) {
+		return getProfitPerItem(identifier, data) * getAmountPerStore(identifier, data);
+	}
+
+	static int getProfitPerStorePerRun(int identifier, Pair<Integer, Integer> data) {
+		if (!getStackable(identifier) && getAmountPerStore(identifier, data) > 28)
+			return getProfitPerItem(identifier, data) * 28;
+		else
+			return getProfitPerStore(identifier, data);
+	}
+
+	static ArrayList<LocationData> locationsWithPair(int identifier, LocationData[] data, Pair<Integer, Integer> pair){
+		ArrayList<LocationData> out = new ArrayList<>();
+		for(LocationData loc : data)
+			if(getInitialPrice(identifier, pair) == getInitialPrice(identifier, loc) && getAmountPerStore(identifier, pair) == getAmountPerStore(identifier, loc))
+				out.add(loc);
+		return out;
 	}
 
 	//Database save/load code below this point

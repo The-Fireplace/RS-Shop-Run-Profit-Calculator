@@ -346,9 +346,9 @@ class GuiEditData extends JPanel {
 				else
 					saveCurrentData();
 				itemName = Database.getItemName(editingIdent);
-				initPriceTF.setText(String.valueOf(Database.getInitialPrice(editingIdent)));
+				initPriceTF.setText(String.valueOf(Database.getDefaultInitialPrice(editingIdent)));
 				gePriceTF.setText(String.valueOf(Database.getGEPrice(editingIdent)));
-				storeStockTF.setText(String.valueOf(Database.getAmountPerStore(editingIdent)));
+				storeStockTF.setText(String.valueOf(Database.getDefaultAmountPerStore(editingIdent)));
 				stackableCB.getModel().setSelected(Database.getStackable(editingIdent));
 				sellSpeedTF.setText(Database.getItemSellSpeed(editingIdent));
 				locations.setListData(Database.getLocations(editingIdent));
@@ -410,40 +410,40 @@ class GuiEditData extends JPanel {
 			int ret = 0;
 			switch ((String) sortS.getSelectedItem()) {
 				case "Default Profit/Store/Run (H->L)":
-					int psr1 = Database.getProfitPerStorePerRun(o1);
-					int psr2 = Database.getProfitPerStorePerRun(o2);
+					int psr1 = Database.getDefaultProfitPerStorePerRun(o1);
+					int psr2 = Database.getDefaultProfitPerStorePerRun(o2);
 					if (psr1 < psr2)
 						ret = 1;
 					else if (psr1 > psr2)
 						ret = -1;
 					return ret;
 				case "Default Profit/Store (H->L)":
-					int ps1 = Database.getProfitPerStore(o1);
-					int ps2 = Database.getProfitPerStore(o2);
+					int ps1 = Database.getDefaultProfitPerStore(o1);
+					int ps2 = Database.getDefaultProfitPerStore(o2);
 					if (ps1 < ps2)
 						ret = 1;
 					else if (ps1 > ps2)
 						ret = -1;
 					return ret;
 				case "Default Profit Margin (H->L)":
-					float pm1 = Database.getProfitMarginPercent(o1);
-					float pm2 = Database.getProfitMarginPercent(o2);
+					float pm1 = Database.getDefaultProfitMarginPercent(o1);
+					float pm2 = Database.getDefaultProfitMarginPercent(o2);
 					if (pm1 < pm2)
 						ret = 1;
 					else if (pm1 > pm2)
 						ret = -1;
 					return ret;
 				case "Default Profit/Item (H->L)":
-					float pi1 = Database.getProfitPerItem(o1);
-					float pi2 = Database.getProfitPerItem(o2);
+					float pi1 = Database.getDefaultProfitPerItem(o1);
+					float pi2 = Database.getDefaultProfitPerItem(o2);
 					if (pi1 < pi2)
 						ret = 1;
 					else if (pi1 > pi2)
 						ret = -1;
 					return ret;
 				case "Default Initial Price (L->H)":
-					float ip1 = Database.getInitialPrice(o1);
-					float ip2 = Database.getInitialPrice(o2);
+					float ip1 = Database.getDefaultInitialPrice(o1);
+					float ip2 = Database.getDefaultInitialPrice(o2);
 					if (ip1 > ip2)
 						ret = 1;
 					else if (ip1 < ip2)
