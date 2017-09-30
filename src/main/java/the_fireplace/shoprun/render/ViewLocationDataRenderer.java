@@ -1,6 +1,8 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.render;
 
 import javafx.util.Pair;
+import the_fireplace.shoprun.LocationData;
+import the_fireplace.shoprun.gui.GuiViewData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +13,7 @@ public class ViewLocationDataRenderer extends DefaultListCellRenderer {
 
 	GuiViewData dataGui;
 
-	ViewLocationDataRenderer(GuiViewData dataGui){
+	public ViewLocationDataRenderer(GuiViewData dataGui){
 		this.dataGui = dataGui;
 	}
 

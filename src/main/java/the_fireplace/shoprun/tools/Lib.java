@@ -1,8 +1,11 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.tools;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import the_fireplace.shoprun.Database;
+import the_fireplace.shoprun.LocationData;
+import the_fireplace.shoprun.ShopRunData;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -66,7 +69,7 @@ public abstract class Lib {
 
 	private static JsonObject itemsJson;
 
-	static void loadItemIDs() {
+	public static void loadItemIDs() {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getClass().getResourceAsStream("/items_rs3.json")));
 
@@ -122,7 +125,7 @@ public abstract class Lib {
 		}
 	}
 
-	static int getItemGEPrice(int itemId, int curVal) {
+	public static int getItemGEPrice(int itemId, int curVal) {
 		//Use the GE API to retrieve the item's current GE Price. http://runescape.wikia.com/wiki/Application_programming_interface
 		try {
 			URL url = new URL("http://services.runescape.com/m=itemdb_rs/api/graph/" + String.valueOf(itemId) + ".json");

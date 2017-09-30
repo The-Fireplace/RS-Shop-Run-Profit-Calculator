@@ -1,16 +1,21 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.gui;
+
+import the_fireplace.shoprun.Database;
+import the_fireplace.shoprun.tools.EnumDataKey;
+import the_fireplace.shoprun.tools.Lib;
+import the_fireplace.shoprun.ShopRunData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class GuiActionSelector extends JPanel {
+public class GuiActionSelector extends JPanel {
 	private JButton viewB, editB, addB, syncB, exitB;
 	private JProgressBar syncProgress;
 	private static boolean priceSyncing;
 
-	GuiActionSelector() {
+	public GuiActionSelector() {
 		viewB = new JButton("View Data");
 		viewB.addActionListener(new ViewButtonHandler());
 		editB = new JButton("Edit Data");

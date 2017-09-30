@@ -1,4 +1,6 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.tools;
+
+import the_fireplace.shoprun.LocationData;
 
 public enum EnumDataKey {
 	ITEM_NAME,
@@ -9,7 +11,7 @@ public enum EnumDataKey {
 	SELL_SPEED,
 	LOCATION_DATA;
 
-	static Class getDataType(EnumDataKey key) {
+	public static Class getDataType(EnumDataKey key) {
 		switch (key) {
 			case SELL_SPEED:
 			case ITEM_NAME:

@@ -1,6 +1,10 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.gui;
 
 import javafx.util.Pair;
+import the_fireplace.shoprun.*;
+import the_fireplace.shoprun.render.SellingEntryRenderer;
+import the_fireplace.shoprun.render.ViewLocationDataRenderer;
+import the_fireplace.shoprun.tools.Lib;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -12,10 +16,10 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.*;
 
-class GuiViewData extends JPanel {
+public class GuiViewData extends JPanel {
 	private JButton exitB;
 	private JLabel initPriceL, gePriceL, storeStockL, sellSpeedL, stackableL, profitL, profitMarginL, profitStoreL, initPriceTF, gePriceTF, storeStockTF, profitTF, profitMarginTF, profitStoreTF;
-	JList<Integer> entries;
+	public JList<Integer> entries;
 	private JList<LocationData> locations;
 	private JScrollPane entriesSc, locationsSc;
 	private JComboBox<String> sortS, locationF, sellSpeedF, stackableF;
@@ -24,9 +28,9 @@ class GuiViewData extends JPanel {
 	private static final String[] stackableModelList = new String[]{"Filter by stackability", "Stackable", "Not Stackable"};
 
 	//ID, Pair(Shop Price, Shop Stock), List of associated data
-	static HashMap<Integer, HashMap<Pair<Integer, Integer>, ArrayList<LocationData>>> locationGroups = new HashMap<>();
+	public static HashMap<Integer, HashMap<Pair<Integer, Integer>, ArrayList<LocationData>>> locationGroups = new HashMap<>();
 
-	GuiViewData() {
+	public GuiViewData() {
 		exitB = new JButton("Exit");
 		exitB.addActionListener(new CancelButtonHandler());
 		initPriceTF = new JLabel();

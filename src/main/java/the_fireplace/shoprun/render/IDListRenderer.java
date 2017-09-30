@@ -1,13 +1,15 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.render;
+
+import the_fireplace.shoprun.Database;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class LocationDataRenderer extends DefaultListCellRenderer {
+public class IDListRenderer extends DefaultListCellRenderer {
 
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-		setText(((LocationData)value).locationName);
+		setText(Database.getItemName((int) value));
 		if(isSelected)
 			setBorder(BorderFactory.createLineBorder(new Color(200, 150, 0)));
 		else

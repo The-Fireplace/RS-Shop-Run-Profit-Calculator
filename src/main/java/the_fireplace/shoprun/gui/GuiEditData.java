@@ -1,4 +1,10 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.gui;
+
+import the_fireplace.shoprun.*;
+import the_fireplace.shoprun.render.IDListRenderer;
+import the_fireplace.shoprun.render.LocationDataRenderer;
+import the_fireplace.shoprun.tools.EnumDataKey;
+import the_fireplace.shoprun.tools.Lib;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -17,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-class GuiEditData extends JPanel {
+public class GuiEditData extends JPanel {
 	private JButton saveExitB, exitB, addB, delB, gePriceB, addLocB, delLocB;
 	private JLabel identBoxL, initPriceL, gePriceL, storeStockL, sellSpeedL;
 	private JTextField initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
@@ -34,7 +40,7 @@ class GuiEditData extends JPanel {
 	private ArrayList<Integer> potentialIdents;
 	private String itemName = "";
 
-	GuiEditData() {
+	public GuiEditData() {
 		CanAddDataListener canAddToDatabase = new CanAddDataListener();
 		checkEditorEnabled = new EnableEditorListener();
 		saveExitB = new JButton("Save and Exit");

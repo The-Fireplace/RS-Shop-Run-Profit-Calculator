@@ -1,5 +1,11 @@
 package the_fireplace.shoprun;
 
+import the_fireplace.shoprun.gui.GuiActionSelector;
+import the_fireplace.shoprun.gui.GuiAddData;
+import the_fireplace.shoprun.gui.GuiEditData;
+import the_fireplace.shoprun.gui.GuiViewData;
+import the_fireplace.shoprun.tools.Lib;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -10,16 +16,17 @@ import java.util.logging.SimpleFormatter;
 
 public class ShopRunData extends JFrame {
 	private static final String HEADER = "Runescape Shop Run Database pre1.0-b3";
-	static final int DEFAULT_WIDTH = 1280;
-	static final int DEFAULT_HEIGHT = 720;
+	public static final int DEFAULT_WIDTH = 1280;
+	public static final int DEFAULT_HEIGHT = 720;
 
 	private JMenuBar menuBar;
 	private JMenu fileM, editM, helpM;
-	JCheckBoxMenuItem apiWait, exportLog;
+	public JCheckBoxMenuItem apiWait;
+	JCheckBoxMenuItem exportLog;
 	public static final Logger LOGGER = Logger.getLogger("Runescape Shop Run Database");
 
 	private CardLayout layout;
-	static ShopRunData container;
+	public static ShopRunData container;
 	private FileHandler fh;
 
 	public ShopRunData() {

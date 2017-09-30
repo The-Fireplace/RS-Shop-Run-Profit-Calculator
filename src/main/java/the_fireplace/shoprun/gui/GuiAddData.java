@@ -1,4 +1,8 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.gui;
+
+import the_fireplace.shoprun.*;
+import the_fireplace.shoprun.render.LocationDataRenderer;
+import the_fireplace.shoprun.tools.Lib;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -12,7 +16,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-class GuiAddData extends JPanel {
+public class GuiAddData extends JPanel {
 	private JButton addB, exitB, gePriceB, addLocB, delLocB;
 	private JLabel itemNameL, initPriceL, gePriceL, storeStockL, sellSpeedL, identBoxL;
 	private JTextField itemNameTF, initPriceTF, gePriceTF, storeStockTF, sellSpeedTF;
@@ -23,7 +27,7 @@ class GuiAddData extends JPanel {
 
 	private ArrayList<Integer> potentialIdents;
 
-	GuiAddData() {
+	public GuiAddData() {
 		CanAddDataListener canAddToDatabase = new CanAddDataListener();
 		addB = new JButton("Confirm");
 		addB.addActionListener(new ConfirmButtonHandler());

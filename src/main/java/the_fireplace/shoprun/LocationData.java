@@ -3,7 +3,8 @@ package the_fireplace.shoprun;
 import java.io.Serializable;
 
 public class LocationData implements Serializable {
-	String locationName;
+	private static final long serialVersionUID = 8032982022515525435L;
+	public String locationName;
 	int itemPrice, itemCount, roundTripTime, restockTime;
 
 	public LocationData(String locationName, int itemPrice, int itemCount, int roundTripTime, int restockTime) {

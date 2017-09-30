@@ -1,4 +1,6 @@
-package the_fireplace.shoprun;
+package the_fireplace.shoprun.render;
+
+import the_fireplace.shoprun.Database;
 
 import javax.swing.*;
 import java.awt.*;
