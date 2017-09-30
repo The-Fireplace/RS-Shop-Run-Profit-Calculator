@@ -39,6 +39,8 @@ public class GuiEditData extends JPanel {
 
 	private ArrayList<Integer> potentialIdents;
 	private String itemName = "";
+	//Changes to the selected identifier AFTER the code run on selection completes.
+	private int selectedIdentDelayed;
 
 	public GuiEditData() {
 		CanAddDataListener canAddToDatabase = new CanAddDataListener();
@@ -267,8 +269,8 @@ public class GuiEditData extends JPanel {
 		for (int i = 0; i < locs.length; i++)
 			locs[i] = locations.getModel().getElementAt(i);
 		int identifier = (int) identBox.getSelectedItem();
-		if (identifier != entries.getSelectedValue()) {
-			Database.deleteData(entries.getSelectedValue());
+		if (identifier != selectedIdentDelayed) {
+			Database.deleteData(selectedIdentDelayed);
 			Database.addNewItemData(identifier, itemName, Integer.parseInt(initPriceTF.getText()), Integer.parseInt(gePriceTF.getText()), Integer.parseInt(storeStockTF.getText()), stackableCB.getModel().isSelected(), sellSpeedTF.getText(), locs);
 		} else {
 			Database.setData(identifier, EnumDataKey.DEFAULT_INITIAL_PRICE, Integer.parseInt(initPriceTF.getText()));
@@ -366,6 +368,7 @@ public class GuiEditData extends JPanel {
 				identBox.setModel(new DefaultComboBoxModel<>(potentialIdents.toArray()));
 				identBox.setEditable(potentialIdents.size() > 1);
 				checkButton();
+				selectedIdentDelayed = editingIdent;
 				setCursor(Cursor.getDefaultCursor());
 			}
 		}
