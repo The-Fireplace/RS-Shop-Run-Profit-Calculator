@@ -6,7 +6,10 @@ import the_fireplace.shoprun.gui.GuiEditData;
 import the_fireplace.shoprun.gui.GuiViewData;
 import the_fireplace.shoprun.tools.Lib;
 
+import java.util.List;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.io.IOException;
 import java.util.logging.FileHandler;
@@ -50,18 +53,20 @@ public class ShopRunData extends JFrame {
 					LOGGER.setLevel(Level.ALL);
 					SimpleFormatter formatter = new SimpleFormatter();
 					fh.setFormatter(formatter);
-
+					Database.setLoggerEnabled(true);
 					LOGGER.info("Logger enabled");
 
 				} catch (SecurityException | IOException ex) {
 					ex.printStackTrace();
 				}
 			} else {
+				Database.setLoggerEnabled(false);
 				LOGGER.info("Logging disabled");
 				LOGGER.removeHandler(fh);
 				fh.close();
 			}
 		});
+		exportLog.getModel().setSelected(Database.isLoggerEnabled());
 		fileM.add(exportLog);
 		editM = new JMenu("Settings");
 		apiWait = new JCheckBoxMenuItem("Delay between API Usage");
@@ -104,6 +109,22 @@ public class ShopRunData extends JFrame {
 
 	public static void main(String[] args) throws IOException {
 		Database.init();
+		customizeUI();
 		new ShopRunData();
+	}
+
+	private static void customizeUI(){
+		Object grad = UIManager.get("Button.gradient");
+		List gradient;
+		if (grad instanceof List) {
+			gradient = (List) grad;
+			gradient.set(2, new ColorUIResource(228, 204, 109));
+			gradient.set(3, new ColorUIResource(208, 153, 41));
+			gradient.set(4, new ColorUIResource(130, 113, 35));
+		}
+		UIManager.put("Button.select", new Color(208, 184, 89));
+		UIManager.put("Button.border", BorderFactory.createBevelBorder(BevelBorder.RAISED, new Color(188, 164, 89), new Color(110, 113, 35)));
+		UIManager.put("ProgressBar.selectionBackground", new Color(208, 153, 41));
+		UIManager.put("ProgressBar.foreground", new Color(248, 193, 81));
 	}
 }

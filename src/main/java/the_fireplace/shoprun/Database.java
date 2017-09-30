@@ -13,6 +13,9 @@ public final class Database implements Serializable {
 	private static Database instance;
 	private static boolean initDone;
 
+	//Keep the logger state here for easy saving and loading
+	private boolean loggerEnabled;
+
 	//Identifier, DataKey, StoredData
 	private HashMap<Integer, HashMap<String, Object>> itemDatabase;
 
@@ -230,5 +233,13 @@ public final class Database implements Serializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void setLoggerEnabled(boolean loggerEnabled) {
+		instance.loggerEnabled = loggerEnabled;
+	}
+
+	public static boolean isLoggerEnabled() {
+		return instance.loggerEnabled;
 	}
 }
