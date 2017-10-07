@@ -122,9 +122,9 @@ public class ShopRunData extends JFrame {
 			gradient.set(3, new ColorUIResource(208, 153, 41));
 			gradient.set(4, new ColorUIResource(130, 113, 35));
 		}
-		UIManager.put("Button.select", new Color(208, 184, 89));
-		UIManager.put("Button.border", BorderFactory.createBevelBorder(BevelBorder.RAISED, new Color(188, 164, 89), new Color(110, 113, 35)));
-		UIManager.put("ProgressBar.selectionBackground", new Color(208, 153, 41));
-		UIManager.put("ProgressBar.foreground", new Color(248, 193, 81));
+		UIManager.put("Button.select", new Color(208, 184, 89));//The color of the selected button
+		UIManager.put("Button.border", BorderFactory.createBevelBorder(BevelBorder.RAISED, new Color(188, 164, 89), new Color(110, 113, 35)));//The yellow is kind of bright, but it works.
+		UIManager.put("ProgressBar.selectionBackground", new Color(208, 153, 41));//The percent, when shown.
+		UIManager.put("ProgressBar.foreground", new Color(248, 193, 81));//The bar itself
 	}
 }
