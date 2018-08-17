@@ -1,10 +1,10 @@
 package the_fireplace.shoprun.gui;
 
-import javafx.util.Pair;
 import the_fireplace.shoprun.*;
 import the_fireplace.shoprun.render.SellingEntryRenderer;
 import the_fireplace.shoprun.render.ViewLocationDataRenderer;
 import the_fireplace.shoprun.tools.Lib;
+import the_fireplace.shoprun.tools.Pair;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;

@@ -1,8 +1,8 @@
 package the_fireplace.shoprun.render;
 
-import javafx.util.Pair;
 import the_fireplace.shoprun.LocationData;
 import the_fireplace.shoprun.gui.GuiViewData;
+import the_fireplace.shoprun.tools.Pair;
 
 import javax.swing.*;
 import java.awt.*;

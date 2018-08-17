@@ -1,7 +1,7 @@
 package the_fireplace.shoprun;
 
-import javafx.util.Pair;
 import the_fireplace.shoprun.tools.EnumDataKey;
+import the_fireplace.shoprun.tools.Pair;
 
 import java.io.*;
 import java.util.*;
