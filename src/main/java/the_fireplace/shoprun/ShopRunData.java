@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class ShopRunData extends JFrame {
-	private static final String HEADER = "Runescape Shop Run Database pre1.0-b3";
+	private static final String HEADER = "Runescape Shop Run Database pre1.0-b4";
 	public static final int DEFAULT_WIDTH = 1280;
 	public static final int DEFAULT_HEIGHT = 720;
 
