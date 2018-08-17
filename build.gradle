@@ -3,12 +3,12 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
     }
 }
 
 plugins {
-    id 'com.github.johnrengelman.shadow' version '2.0.1'
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
     id 'java'
     id 'idea'
 }
@@ -16,7 +16,7 @@ plugins {
 sourceCompatibility = 1.8
 
 description = 'A program to assist in determining where the most profitable shop runs are in Runescape.'
-version = 'pre1.0-b3'
+version = 'pre1.0-b4'
 
 repositories {
     mavenCentral()
