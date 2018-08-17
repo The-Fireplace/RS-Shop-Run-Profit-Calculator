@@ -71,7 +71,7 @@ public abstract class Lib {
 
 	public static void loadItemIDs() {
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getClass().getResourceAsStream("/items_rs3.json")));
+			BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getResourceAsStream("items_rs3.json")));
 
 			itemsJson = new Gson().fromJson(br, JsonObject.class);
 		} catch (Exception e) {
@@ -83,8 +83,7 @@ public abstract class Lib {
 	public static ArrayList<Integer> getPotentialItemIdents(String itemName) {
 		itemName = itemName.substring(0, 1).toUpperCase() + itemName.substring(1).toLowerCase();
 		if(Database.getAllIdentsForItem().containsKey(itemName)) {
-			ArrayList<Integer> outputIdents = new ArrayList<>();
-			outputIdents.addAll(Database.getAllIdentsForItem().get(itemName));
+			ArrayList<Integer> outputIdents = new ArrayList<>(Database.getAllIdentsForItem().get(itemName));
 			//We only want unused identifiers
 			outputIdents.removeIf(ident -> !Database.isValidIdentifier(ident));
 			return outputIdents;
