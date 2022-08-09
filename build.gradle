@@ -4,8 +4,18 @@ plugins {
     id 'idea'
 }
 
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
 description = 'A program to assist in determining where the most profitable shop runs are in Runescape.'
 version = '0.0.5'
+group = 'dev.the_fireplace'
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release.set(17)
+}
 
 repositories {
     mavenCentral()
@@ -20,7 +30,7 @@ processResources {
 }
 
 task run(dependsOn: 'classes', type: JavaExec) {
-    main = 'the_fireplace.shoprun.ShopRunData'
+    main = 'dev.the_fireplace.shoprun.ShopRunData'
     classpath = sourceSets.main.runtimeClasspath
     workingDir = './run'
 }
@@ -29,7 +39,7 @@ jar {
     manifest {
         attributes(
                 'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
-                'Main-Class': 'the_fireplace.shoprun.ShopRunData'
+                'Main-Class': 'dev.the_fireplace.shoprun.ShopRunData'
         )
     }
 }
