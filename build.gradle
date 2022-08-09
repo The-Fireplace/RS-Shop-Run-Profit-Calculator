@@ -1,30 +1,18 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
-    }
-}
-
 plugins {
-    id 'com.github.johnrengelman.shadow' version '2.0.4'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'java'
     id 'idea'
 }
-
-sourceCompatibility = 1.8
 
 description = 'A program to assist in determining where the most profitable shop runs are in Runescape.'
 version = 'pre1.0-b4'
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
-    compile 'com.google.code.gson:gson:2.+'
+    compileOnly 'com.google.code.gson:gson:2.9.0'
 }
 
 task run(dependsOn: 'classes', type: JavaExec) {
@@ -36,7 +24,7 @@ task run(dependsOn: 'classes', type: JavaExec) {
 jar {
     manifest {
         attributes(
-                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
                 'Main-Class': 'the_fireplace.shoprun.ShopRunData'
         )
     }
