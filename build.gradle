@@ -5,7 +5,7 @@ plugins {
 }
 
 description = 'A program to assist in determining where the most profitable shop runs are in Runescape.'
-version = 'pre1.0-b5'
+version = '0.0.5'
 
 repositories {
     mavenCentral()
