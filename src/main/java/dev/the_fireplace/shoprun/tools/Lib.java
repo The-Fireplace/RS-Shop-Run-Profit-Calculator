@@ -105,7 +105,7 @@ public abstract class Lib
                 while (true)//Loop so we can have it try again if the API Feeds us garbage
                 {
                     try {
-                        URL url = new URL("http://services.runescape.com/m=itemdb_rs/api/graph/" + ident + ".json");
+                        URL url = new URL("https://services.runescape.com/m=itemdb_rs/api/graph/" + ident + ".json");
                         InputStream is = url.openStream();
                         //Check to make sure RS API isn't feeding us garbage
                         try {
@@ -116,6 +116,7 @@ public abstract class Lib
                                 return false;
                             }
                         } catch (Exception e) {
+                            ShopRunData.LOGGER.warning(e.toString());
                             //Wait and try again
                             Thread.sleep(5001);
                         }
@@ -134,9 +135,9 @@ public abstract class Lib
     }
 
     public static int getItemGEPrice(int itemId, int curVal) {
-        //Use the GE API to retrieve the item's current GE Price. http://runescape.wikia.com/wiki/Application_programming_interface
+        //Use the GE API to retrieve the item's current GE Price. https://runescape.fandom.com/wiki/Application_programming_interface
         try {
-            URL url = new URL("http://services.runescape.com/m=itemdb_rs/api/graph/" + itemId + ".json");
+            URL url = new URL("https://services.runescape.com/m=itemdb_rs/api/graph/" + itemId + ".json");
             InputStream is = url.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
